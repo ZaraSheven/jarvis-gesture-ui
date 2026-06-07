@@ -64,69 +64,24 @@ export function CentralVisual({ activeGesture }: CentralVisualProps) {
   return (
     <div className="fixed inset-0 flex items-center justify-center z-10 pointer-events-none">
       <div className="relative">
+        {/* Outer pulse ring */}
         <div 
           className="absolute inset-0 rounded-full animate-ping"
           style={{
-            width: '200px',
-            height: '200px',
-            marginLeft: '-100px',
-            marginTop: '-100px',
+            width: '120px',
+            height: '120px',
+            marginLeft: '-60px',
+            marginTop: '-60px',
             left: '50%',
             top: '50%',
-            border: `2px solid ${ringColor}`,
+            border: `1.5px solid ${ringColor}`,
             opacity: 0.2
           }}
         />
         
+        {/* Middle pulse ring */}
         <div 
           className="absolute inset-0 rounded-full"
-          style={{
-            width: '180px',
-            height: '180px',
-            marginLeft: '-90px',
-            marginTop: '-90px',
-            left: '50%',
-            top: '50%',
-            border: `2px solid ${ringColor}`,
-            opacity: 0.4,
-            transform: `scale(${1 + Math.sin(pulse) * 0.1})`
-          }}
-        />
-        
-        <div 
-          className="absolute inset-0 rounded-full"
-          style={{
-            width: '150px',
-            height: '150px',
-            marginLeft: '-75px',
-            marginTop: '-75px',
-            left: '50%',
-            top: '50%',
-            border: `3px solid ${ringColor}`,
-            boxShadow: `0 0 30px ${ringColor}40, inset 0 0 30px ${ringColor}20`,
-            transform: `rotate(${rotation}deg)`
-          }}
-        >
-          <div 
-            className="absolute top-0 left-1/2 w-2 h-2 rounded-full -translate-x-1/2 -translate-y-1/2"
-            style={{ backgroundColor: ringColor, boxShadow: `0 0 10px ${ringColor}` }}
-          />
-          <div 
-            className="absolute bottom-0 left-1/2 w-2 h-2 rounded-full -translate-x-1/2 translate-y-1/2"
-            style={{ backgroundColor: ringColor, boxShadow: `0 0 10px ${ringColor}` }}
-          />
-          <div 
-            className="absolute left-0 top-1/2 w-2 h-2 rounded-full -translate-y-1/2 -translate-x-1/2"
-            style={{ backgroundColor: ringColor, boxShadow: `0 0 10px ${ringColor}` }}
-          />
-          <div 
-            className="absolute right-0 top-1/2 w-2 h-2 rounded-full -translate-y-1/2 translate-x-1/2"
-            style={{ backgroundColor: ringColor, boxShadow: `0 0 10px ${ringColor}` }}
-          />
-        </div>
-        
-        <div 
-          className="absolute inset-0 rounded-full flex items-center justify-center"
           style={{
             width: '100px',
             height: '100px',
@@ -134,47 +89,97 @@ export function CentralVisual({ activeGesture }: CentralVisualProps) {
             marginTop: '-50px',
             left: '50%',
             top: '50%',
+            border: `1.5px solid ${ringColor}`,
+            opacity: 0.4,
+            transform: `scale(${1 + Math.sin(pulse) * 0.1})`
+          }}
+        />
+        
+        {/* Rotating ring */}
+        <div 
+          className="absolute inset-0 rounded-full"
+          style={{
+            width: '80px',
+            height: '80px',
+            marginLeft: '-40px',
+            marginTop: '-40px',
+            left: '50%',
+            top: '50%',
             border: `2px solid ${ringColor}`,
-            background: `radial-gradient(circle, ${ringColor}10 0%, transparent 70%)`,
-            boxShadow: `0 0 50px ${ringColor}30`
+            boxShadow: `0 0 20px ${ringColor}40, inset 0 0 20px ${ringColor}20`,
+            transform: `rotate(${rotation}deg)`
           }}
         >
           <div 
-            className="w-4 h-4 rounded-full"
+            className="absolute top-0 left-1/2 w-1.5 h-1.5 rounded-full -translate-x-1/2 -translate-y-1/2"
+            style={{ backgroundColor: ringColor, boxShadow: `0 0 8px ${ringColor}` }}
+          />
+          <div 
+            className="absolute bottom-0 left-1/2 w-1.5 h-1.5 rounded-full -translate-x-1/2 translate-y-1/2"
+            style={{ backgroundColor: ringColor, boxShadow: `0 0 8px ${ringColor}` }}
+          />
+          <div 
+            className="absolute left-0 top-1/2 w-1.5 h-1.5 rounded-full -translate-y-1/2 -translate-x-1/2"
+            style={{ backgroundColor: ringColor, boxShadow: `0 0 8px ${ringColor}` }}
+          />
+          <div 
+            className="absolute right-0 top-1/2 w-1.5 h-1.5 rounded-full -translate-y-1/2 translate-x-1/2"
+            style={{ backgroundColor: ringColor, boxShadow: `0 0 8px ${ringColor}` }}
+          />
+        </div>
+        
+        {/* Center core */}
+        <div 
+          className="absolute inset-0 rounded-full flex items-center justify-center"
+          style={{
+            width: '50px',
+            height: '50px',
+            marginLeft: '-25px',
+            marginTop: '-25px',
+            left: '50%',
+            top: '50%',
+            border: `1.5px solid ${ringColor}`,
+            background: `radial-gradient(circle, ${ringColor}10 0%, transparent 70%)`,
+            boxShadow: `0 0 30px ${ringColor}30`
+          }}
+        >
+          <div 
+            className="w-2.5 h-2.5 rounded-full"
             style={{ 
               backgroundColor: ringColor,
-              boxShadow: `0 0 20px ${ringColor}, 0 0 40px ${ringColor}60`,
+              boxShadow: `0 0 15px ${ringColor}, 0 0 30px ${ringColor}60`,
               transform: `scale(${0.8 + Math.sin(pulse * 2) * 0.2})`
             }}
           />
         </div>
         
+        {/* Text label */}
         <div 
           className="absolute top-1/2 left-1/2 text-center whitespace-nowrap"
           style={{
-            transform: 'translate(-50%, 100px)'
+            transform: 'translate(-50%, 60px)'
           }}
         >
           <div 
-            className="font-mono text-sm uppercase tracking-widest mb-2"
+            className="font-mono text-[10px] md:text-sm uppercase tracking-widest mb-1 md:mb-2"
             style={{ color: ringColor }}
           >
             JARVIS INTERFACE
           </div>
           <div 
-            className={`font-mono text-xl font-bold transition-all duration-300 ${
+            className={`font-mono text-sm md:text-xl font-bold transition-all duration-300 ${
               hasGesture ? 'animate-pulse' : ''
             }`}
             style={{ 
               color: hasGesture ? ringColor : '#8892b0',
-              textShadow: hasGesture ? `0 0 20px ${ringColor}80` : 'none'
+              textShadow: hasGesture ? `0 0 15px ${ringColor}80` : 'none'
             }}
           >
             {getGestureText(activeGesture)}
           </div>
           {hasGesture && (
             <div 
-              className="mt-2 font-mono text-xs"
+              className="mt-1 font-mono text-[10px] md:text-xs"
               style={{ color: ringColor }}
             >
               GESTURE: {activeGesture.toUpperCase().replace('_', ' ')}
