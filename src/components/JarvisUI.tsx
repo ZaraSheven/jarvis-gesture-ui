@@ -25,6 +25,7 @@ export function JarvisUI() {
     onGestureDetected: (gesture) => {
       setGestureHistory(prev => [...prev.slice(-9), gesture]);
     },
+    demoMode: true,
   });
 
   return (
