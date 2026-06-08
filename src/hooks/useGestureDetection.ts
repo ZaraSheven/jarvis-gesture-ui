@@ -15,6 +15,7 @@ export function useGestureDetection({ onGestureDetected }: UseGestureDetectionPr
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [currentGesture, setCurrentGesture] = useState<GestureResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const handsRef = useRef<Hands | null>(null);
@@ -22,6 +23,7 @@ export function useGestureDetection({ onGestureDetected }: UseGestureDetectionPr
   const lastResultRef = useRef<GestureResult | null>(null);
   const lastDetectionRef = useRef(0);
   const animationFrameRef = useRef<number>();
+  const isDetectingRef = useRef(false);
   const callbackRef = useRef(onGestureDetected);
 
   useEffect(() => {
@@ -29,10 +31,10 @@ export function useGestureDetection({ onGestureDetected }: UseGestureDetectionPr
   }, [onGestureDetected]);
 
   const initHands = useCallback(async () => {
-    if (handsRef.current) return;
+    if (handsRef.current) return handsRef.current;
 
     const hands = new Hands({
-      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/${file}`
     });
 
     hands.setOptions({
@@ -42,50 +44,10 @@ export function useGestureDetection({ onGestureDetected }: UseGestureDetectionPr
       minTrackingConfidence: 0.5
     });
 
+    hands.onResults(processResults);
     handsRef.current = hands;
-  }, []);
-
-  const startCamera = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      await initHands();
-
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          width: { ideal: 640 },
-          height: { ideal: 480 },
-          facingMode: 'user'
-        }
-      });
-
-      streamRef.current = stream;
-
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-      }
-
-      setIsCameraActive(true);
-      setIsLoading(false);
-      startDetection();
-    } catch (error) {
-      console.error('Camera access error:', error);
-      setIsLoading(false);
-    }
-  }, [initHands]);
-
-  const stopCamera = useCallback(() => {
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-    }
     
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-      streamRef.current = null;
-    }
-    
-    setIsCameraActive(false);
-    setCurrentGesture(null);
+    return hands;
   }, []);
 
   const processResults = useCallback((results: MediaPipeResults) => {
@@ -113,27 +75,87 @@ export function useGestureDetection({ onGestureDetected }: UseGestureDetectionPr
     }
   }, []);
 
-  const startDetection = useCallback(() => {
-    if (!handsRef.current || !videoRef.current) return;
-
-    handsRef.current.onResults(processResults);
-
-    const renderFrame = async () => {
-      if (videoRef.current && handsRef.current) {
+  const detectionLoop = useCallback(async () => {
+    if (!isDetectingRef.current) return;
+    
+    if (videoRef.current && handsRef.current) {
+      try {
         const now = Date.now();
         if (now - lastDetectionRef.current >= DETECTION_INTERVAL) {
           await handsRef.current.send({ image: videoRef.current });
           lastDetectionRef.current = now;
         }
+      } catch (err) {
+        console.error('Detection error:', err);
       }
-      animationFrameRef.current = requestAnimationFrame(renderFrame);
-    };
+    }
+    
+    animationFrameRef.current = requestAnimationFrame(detectionLoop);
+  }, []);
 
-    renderFrame();
-  }, [processResults]);
+  const startCamera = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const hands = await initHands();
+      
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          width: { ideal: 640 },
+          height: { ideal: 480 },
+          facingMode: 'user'
+        }
+      });
+
+      streamRef.current = stream;
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await new Promise<void>((resolve) => {
+          if (videoRef.current) {
+            videoRef.current.onloadedmetadata = () => {
+              videoRef.current!.play().then(() => resolve());
+            };
+          } else {
+            resolve();
+          }
+        });
+
+        isDetectingRef.current = true;
+        setIsCameraActive(true);
+        setIsLoading(false);
+        
+        animationFrameRef.current = requestAnimationFrame(detectionLoop);
+      }
+    } catch (error) {
+      console.error('Camera access error:', error);
+      setError(error instanceof Error ? error.message : 'Failed to access camera');
+      setIsLoading(false);
+      setIsCameraActive(false);
+    }
+  }, [initHands, detectionLoop]);
+
+  const stopCamera = useCallback(() => {
+    isDetectingRef.current = false;
+    
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = undefined;
+    }
+    
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    
+    setIsCameraActive(false);
+    setCurrentGesture(null);
+  }, []);
 
   useEffect(() => {
     return () => {
+      isDetectingRef.current = false;
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
@@ -147,6 +169,7 @@ export function useGestureDetection({ onGestureDetected }: UseGestureDetectionPr
     videoRef,
     isCameraActive,
     isLoading,
+    error,
     currentGesture,
     startCamera,
     stopCamera

@@ -1,9 +1,10 @@
-import { Video, VideoOff, Loader2, Zap } from 'lucide-react';
+import { Video, VideoOff, Loader2, Zap, AlertCircle } from 'lucide-react';
 
 interface GestureCameraProps {
-  videoRef: React.RefObject<HTMLVideoElement>;
+  videoRef: React.RefObject<HTMLVideoElement | null>;
   isCameraActive: boolean;
   isLoading: boolean;
+  error: string | null;
   onStart: () => void;
   onStop: () => void;
 }
@@ -12,6 +13,7 @@ export function GestureCamera({
   videoRef, 
   isCameraActive, 
   isLoading, 
+  error,
   onStart, 
   onStop 
 }: GestureCameraProps) {
@@ -31,7 +33,7 @@ export function GestureCamera({
             <button
               onClick={onStart}
               disabled={isLoading}
-              className="flex items-center gap-1.5 md:gap-2 px-2.5 md:px-3 py-1.5 bg-[#64ffda]/10 border border-[#64ffda]/50 rounded-lg text-[#64ffda] hover:bg-[#64ffda]/20 transition-all text-[10px] md:text-xs font-mono"
+              className="flex items-center gap-1.5 md:gap-2 px-2.5 md:px-3 py-1.5 bg-[#64ffda]/10 border border-[#64ffda]/50 rounded-lg text-[#64ffda] hover:bg-[#64ffda]/20 transition-all text-[10px] md:text-xs font-mono disabled:opacity-50"
             >
               {isLoading ? <Loader2 className="w-3.5 h-3.5 md:w-4 md:h-4 animate-spin" /> : <Video className="w-3.5 h-3.5 md:w-4 md:h-4" />}
               {isLoading ? 'LOADING' : 'START'}
@@ -55,7 +57,16 @@ export function GestureCamera({
             muted
           />
           
-          {!isCameraActive && !isLoading && (
+          {error && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0a192f]/95 p-3">
+              <AlertCircle className="w-6 h-6 md:w-8 md:h-8 text-red-400 mb-2" />
+              <span className="text-red-400 text-[9px] md:text-xs font-mono text-center">
+                {error}
+              </span>
+            </div>
+          )}
+          
+          {!isCameraActive && !isLoading && !error && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0a192f]/90">
               <Zap className="w-6 h-6 md:w-8 md:h-8 text-[#64ffda]/50 mb-2" />
               <span className="text-[#8892b0] text-[10px] md:text-xs font-mono">
@@ -73,22 +84,17 @@ export function GestureCamera({
             </div>
           )}
           
-          <div className="absolute top-1.5 md:top-2 left-1.5 md:left-2 right-1.5 md:right-2 flex justify-between items-center pointer-events-none">
-            <div className="flex items-center gap-1.5 md:gap-2">
-              <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-red-500 animate-pulse" />
-              <span className="text-white text-[8px] md:text-xs font-mono">REC</span>
+          {isCameraActive && (
+            <div className="absolute top-1.5 md:top-2 left-1.5 md:left-2 right-1.5 md:right-2 flex justify-between items-center pointer-events-none">
+              <div className="flex items-center gap-1.5 md:gap-2">
+                <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-red-500 animate-pulse" />
+                <span className="text-white text-[8px] md:text-xs font-mono">REC</span>
+              </div>
+              <div className="bg-black/50 px-1.5 md:px-2 py-0.5 md:py-1 rounded text-[#64ffda] text-[8px] md:text-xs font-mono">
+                HD
+              </div>
             </div>
-            <div className="bg-black/50 px-1.5 md:px-2 py-0.5 md:py-1 rounded text-[#64ffda] text-[8px] md:text-xs font-mono">
-              HD
-            </div>
-          </div>
-          
-          <div className="absolute bottom-1.5 md:bottom-2 left-1.5 md:left-2 right-1.5 md:right-2 flex justify-between items-center pointer-events-none">
-            <div className="bg-black/50 px-1.5 md:px-2 py-0.5 md:py-1 rounded text-white text-[8px] md:text-xs font-mono">
-              {new Date().toLocaleTimeString('en-US', { hour12: false })}
-            </div>
-            <div className="w-5 h-5 md:w-8 md:h-8 border-2 border-[#64ffda] rounded" />
-          </div>
+          )}
         </div>
       </div>
     </div>

@@ -17,6 +17,7 @@ export function JarvisUI() {
     videoRef,
     isCameraActive,
     isLoading,
+    error,
     currentGesture,
     startCamera,
     stopCamera
@@ -65,6 +66,7 @@ export function JarvisUI() {
         videoRef={videoRef}
         isCameraActive={isCameraActive}
         isLoading={isLoading}
+        error={error}
         onStart={startCamera}
         onStop={stopCamera}
       />
