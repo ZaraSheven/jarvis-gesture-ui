@@ -1,63 +1,5 @@
 import { GestureType } from '@/types/gesture';
-import { Hand, ArrowUp, ArrowLeft, ArrowRight, ThumbsUp, ThumbsDown, Scissors, Circle } from 'lucide-react';
-
-interface Command {
-  gesture: GestureType;
-  icon: React.ReactNode;
-  name: string;
-  description: string;
-}
-
-const commands: Command[] = [
-  {
-    gesture: 'open_palm',
-    icon: <Hand className="w-4 h-4 md:w-5 md:h-5" />,
-    name: 'Open Palm',
-    description: 'Activate system'
-  },
-  {
-    gesture: 'fist',
-    icon: <Circle className="w-4 h-4 md:w-5 md:h-5" />,
-    name: 'Fist',
-    description: 'Stand by mode'
-  },
-  {
-    gesture: 'point_up',
-    icon: <ArrowUp className="w-4 h-4 md:w-5 md:h-5" />,
-    name: 'Point Up',
-    description: 'Navigate up'
-  },
-  {
-    gesture: 'point_left',
-    icon: <ArrowLeft className="w-4 h-4 md:w-5 md:h-5" />,
-    name: 'Point Left',
-    description: 'Navigate left'
-  },
-  {
-    gesture: 'point_right',
-    icon: <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />,
-    name: 'Point Right',
-    description: 'Navigate right'
-  },
-  {
-    gesture: 'thumbs_up',
-    icon: <ThumbsUp className="w-4 h-4 md:w-5 md:h-5" />,
-    name: 'Thumbs Up',
-    description: 'Confirm'
-  },
-  {
-    gesture: 'thumbs_down',
-    icon: <ThumbsDown className="w-4 h-4 md:w-5 md:h-5" />,
-    name: 'Thumbs Down',
-    description: 'Cancel'
-  },
-  {
-    gesture: 'peace',
-    icon: <Scissors className="w-4 h-4 md:w-5 md:h-5" />,
-    name: 'Peace',
-    description: 'Take screenshot'
-  }
-];
+import { gestureCommands } from '@/config/gestureCommands';
 
 interface CommandPanelProps {
   activeGesture?: GestureType;
@@ -71,7 +13,7 @@ export function CommandPanel({ activeGesture }: CommandPanelProps) {
           Gesture Commands
         </div>
         <div className="space-y-1 md:space-y-2">
-          {commands.map((cmd) => (
+          {gestureCommands.map((cmd) => (
             <div
               key={cmd.gesture}
               className={`flex items-center gap-2 md:gap-3 p-1.5 md:p-2 rounded-lg transition-all duration-300 ${

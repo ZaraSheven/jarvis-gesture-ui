@@ -5,66 +5,9 @@ import { CentralVisual } from './CentralVisual';
 import { CommandPanel } from './CommandPanel';
 import { GestureCamera } from './GestureCamera';
 import { useGestureDetection } from '../hooks/useGestureDetection';
-import { GestureResult, GestureType } from '../types/gesture';
-import { Hand, ArrowUp, ArrowLeft, ArrowRight, ThumbsUp, ThumbsDown, Scissors, Circle, Menu, X } from 'lucide-react';
-
-interface Command {
-  gesture: GestureType;
-  icon: React.ReactNode;
-  name: string;
-  description: string;
-}
-
-const mobileCommands: Command[] = [
-  {
-    gesture: 'open_palm',
-    icon: <Hand className="w-5 h-5" />,
-    name: 'Open Palm',
-    description: 'Activate system'
-  },
-  {
-    gesture: 'fist',
-    icon: <Circle className="w-5 h-5" />,
-    name: 'Fist',
-    description: 'Stand by mode'
-  },
-  {
-    gesture: 'point_up',
-    icon: <ArrowUp className="w-5 h-5" />,
-    name: 'Point Up',
-    description: 'Navigate up'
-  },
-  {
-    gesture: 'point_left',
-    icon: <ArrowLeft className="w-5 h-5" />,
-    name: 'Point Left',
-    description: 'Navigate left'
-  },
-  {
-    gesture: 'point_right',
-    icon: <ArrowRight className="w-5 h-5" />,
-    name: 'Point Right',
-    description: 'Navigate right'
-  },
-  {
-    gesture: 'thumbs_up',
-    icon: <ThumbsUp className="w-5 h-5" />,
-    name: 'Thumbs Up',
-    description: 'Confirm'
-  },
-  {
-    gesture: 'thumbs_down',
-    icon: <ThumbsDown className="w-5 h-5" />,
-    name: 'Thumbs Down',
-    description: 'Cancel'
-  },
-  {
-    gesture: 'peace',
-    icon: <Scissors className="w-5 h-5" />,
-    name: 'Peace',
-    description: 'Take screenshot'
-  }
-];
+import { GestureResult } from '../types/gesture';
+import { gestureCommands } from '../config/gestureCommands';
+import { Menu, X } from 'lucide-react';
 
 export function JarvisUI() {
   const [gestureHistory, setGestureHistory] = useState<GestureResult[]>([]);
@@ -72,7 +15,6 @@ export function JarvisUI() {
 
   const {
     videoRef,
-    canvasRef,
     isCameraActive,
     isLoading,
     currentGesture,
@@ -121,7 +63,6 @@ export function JarvisUI() {
       {/* Gesture camera */}
       <GestureCamera
         videoRef={videoRef}
-        canvasRef={canvasRef}
         isCameraActive={isCameraActive}
         isLoading={isLoading}
         onStart={startCamera}
@@ -144,7 +85,7 @@ export function JarvisUI() {
               Gesture Commands
             </div>
             <div className="space-y-1.5">
-              {mobileCommands.map((cmd) => (
+              {gestureCommands.map((cmd) => (
                 <div
                   key={cmd.gesture}
                   className={`flex items-center gap-2 p-1.5 rounded-lg transition-all duration-300 ${

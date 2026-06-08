@@ -2,7 +2,6 @@ import { Video, VideoOff, Loader2, Zap } from 'lucide-react';
 
 interface GestureCameraProps {
   videoRef: React.RefObject<HTMLVideoElement>;
-  canvasRef: React.RefObject<HTMLCanvasElement>;
   isCameraActive: boolean;
   isLoading: boolean;
   onStart: () => void;
@@ -11,7 +10,6 @@ interface GestureCameraProps {
 
 export function GestureCamera({ 
   videoRef, 
-  canvasRef, 
   isCameraActive, 
   isLoading, 
   onStart, 
@@ -55,10 +53,6 @@ export function GestureCamera({
             className="w-full h-full object-cover transform scale-x-[-1]"
             playsInline
             muted
-          />
-          <canvas
-            ref={canvasRef}
-            className="absolute inset-0 w-full h-full pointer-events-none"
           />
           
           {!isCameraActive && !isLoading && (
