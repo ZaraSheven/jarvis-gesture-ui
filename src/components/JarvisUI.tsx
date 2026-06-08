@@ -109,7 +109,7 @@ export function JarvisUI() {
       />
       
       {/* Particle system */}
-      <ParticleSystem />
+      <ParticleSystem activeGesture={currentGesture?.gesture} />
       
       {/* Gesture visual effects */}
       {showEffects && (
