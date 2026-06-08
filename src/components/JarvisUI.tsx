@@ -9,7 +9,7 @@ import { useGestureDetection } from '../hooks/useGestureDetection';
 import { GestureResult } from '../types/gesture';
 import { gestureCommands } from '../config/gestureCommands';
 import { Menu, X, Volume2, VolumeX } from 'lucide-react';
-import { playSound, initAudio } from '../utils/audio';
+import { playSound } from '../utils/audio';
 
 export function JarvisUI() {
   const [gestureHistory, setGestureHistory] = useState<GestureResult[]>([]);
@@ -40,8 +40,6 @@ export function JarvisUI() {
       setLastGesture(currentGesture.gesture);
       
       if (soundEnabled) {
-        initAudio();
-        
         switch (currentGesture.gesture) {
           case 'thumbs_up':
             playSound('confirm');
@@ -209,12 +207,14 @@ export function JarvisUI() {
                   className="flex items-center gap-1.5 md:gap-2 text-[9px] md:text-xs font-mono text-[#8892b0]"
                 >
                   <span className="text-[#64ffda]/60">
-                    {new Date().toLocaleTimeString('en-US', { 
-                      hour12: false, 
-                      hour: '2-digit', 
-                      minute: '2-digit', 
-                      second: '2-digit' 
-                    })}
+                    {gesture.timestamp
+                      ? new Date(gesture.timestamp).toLocaleTimeString('en-US', { 
+                          hour12: false, 
+                          hour: '2-digit', 
+                          minute: '2-digit', 
+                          second: '2-digit' 
+                        })
+                      : '--:--:--'}
                   </span>
                   <span className="text-[#64ffda]">
                     {gesture.gesture.toUpperCase().replace('_', ' ')}

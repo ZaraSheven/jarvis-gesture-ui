@@ -62,6 +62,7 @@ export function ParticleSystem({ activeGesture }: ParticleSystemProps) {
   const energyPulseRef = useRef(0);
   const weaponPointsRef = useRef<Array<{ x: number; y: number; z: number; brightness: number }>>([]);
   const weaponStructureRef = useRef<WeaponStructure | null>(null);
+  const lastFrameTimeRef = useRef(0);
 
   useEffect(() => {
     if (activeGesture && activeGesture !== gestureRef.current) {
@@ -442,12 +443,15 @@ export function ParticleSystem({ activeGesture }: ParticleSystemProps) {
         ctx.lineTo(points[i].x, points[i].y);
       }
       ctx.strokeStyle = `rgba(${color},${alpha})`;
-      ctx.lineWidth = 1.5;
+      ctx.lineWidth = 1;
       ctx.stroke();
     };
 
-    const animate = () => {
-      timeRef.current++;
+    const animate = (timestamp: number) => {
+      const deltaTime = lastFrameTimeRef.current ? (timestamp - lastFrameTimeRef.current) / 16.67 : 1;
+      lastFrameTimeRef.current = timestamp;
+      const clampedDelta = Math.min(deltaTime, 3);
+      timeRef.current += clampedDelta;
       const gesture = gestureRef.current;
       const colors = gestureColors[gesture];
       const c = getCenter();
@@ -549,13 +553,9 @@ export function ParticleSystem({ activeGesture }: ParticleSystemProps) {
         ctx.fill();
 
         if (isWeapon && p.brightness > 0.8) {
-          ctx.fillStyle = `rgba(${colors.glow},${a * 0.5})`;
+          ctx.fillStyle = `rgba(${colors.glow},${a * 0.2})`;
           ctx.beginPath();
-          ctx.arc(screenX, screenY, screenR * 3.5, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.fillStyle = `rgba(255,255,255,${a * 0.3})`;
-          ctx.beginPath();
-          ctx.arc(screenX, screenY, screenR * 1.2, 0, Math.PI * 2);
+          ctx.arc(screenX, screenY, screenR * 1.8, 0, Math.PI * 2);
           ctx.fill();
         }
       });
@@ -563,18 +563,18 @@ export function ParticleSystem({ activeGesture }: ParticleSystemProps) {
       if (isWeapon && struct) {
         struct.gemPositions.forEach(gem => {
           const gemPulse = Math.sin(timeRef.current * 0.06) * 0.3 + 0.7;
-          const gemGrad = ctx.createRadialGradient(gem.x, gem.y, 0, gem.x, gem.y, gem.r * 2);
-          gemGrad.addColorStop(0, `rgba(${colors.gem},${0.9 * gemPulse})`);
-          gemGrad.addColorStop(0.3, `rgba(${colors.gem},${0.4 * gemPulse})`);
+          const gemGrad = ctx.createRadialGradient(gem.x, gem.y, 0, gem.x, gem.y, gem.r * 1.5);
+          gemGrad.addColorStop(0, `rgba(${colors.gem},${0.7 * gemPulse})`);
+          gemGrad.addColorStop(0.4, `rgba(${colors.gem},${0.2 * gemPulse})`);
           gemGrad.addColorStop(1, 'rgba(0,0,0,0)');
           ctx.fillStyle = gemGrad;
           ctx.beginPath();
-          ctx.arc(gem.x, gem.y, gem.r * 2, 0, Math.PI * 2);
+          ctx.arc(gem.x, gem.y, gem.r * 1.5, 0, Math.PI * 2);
           ctx.fill();
 
-          ctx.fillStyle = `rgba(255,255,255,${0.6 * gemPulse})`;
+          ctx.fillStyle = `rgba(255,255,255,${0.5 * gemPulse})`;
           ctx.beginPath();
-          ctx.arc(gem.x, gem.y, gem.r * 0.4, 0, Math.PI * 2);
+          ctx.arc(gem.x, gem.y, gem.r * 0.3, 0, Math.PI * 2);
           ctx.fill();
         });
       }
@@ -600,25 +600,25 @@ export function ParticleSystem({ activeGesture }: ParticleSystemProps) {
 
       if (isWeapon) {
         const corePulse = Math.sin(timeRef.current * 0.08) * 0.15 + 0.85;
-        const coreSize = 120 * Math.min(canvas.width, canvas.height) / 800 * corePulse;
+        const coreSize = 100 * Math.min(canvas.width, canvas.height) / 800 * corePulse;
 
         const grad = ctx.createRadialGradient(c.x, c.y, 0, c.x, c.y, coreSize);
-        grad.addColorStop(0, `rgba(${colors.core},${0.06 * corePulse})`);
-        grad.addColorStop(0.3, `rgba(${colors.glow},${0.03 * corePulse})`);
+        grad.addColorStop(0, `rgba(${colors.core},${0.04 * corePulse})`);
+        grad.addColorStop(0.3, `rgba(${colors.glow},${0.02 * corePulse})`);
         grad.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = grad;
         ctx.fillRect(c.x - coreSize, c.y - coreSize, coreSize * 2, coreSize * 2);
 
         for (let ray = 0; ray < 6; ray++) {
           const angle = (ray / 6) * Math.PI * 2 + timeRef.current * 0.003;
-          const rayLen = coreSize * (1.5 + Math.sin(timeRef.current * 0.08 + ray) * 0.4);
+          const rayLen = coreSize * (1.3 + Math.sin(timeRef.current * 0.08 + ray) * 0.3);
           const rx = c.x + Math.cos(angle) * rayLen;
           const ry = c.y + Math.sin(angle) * rayLen;
           const rayGrad = ctx.createLinearGradient(c.x, c.y, rx, ry);
-          rayGrad.addColorStop(0, `rgba(${colors.accent},${0.04 * corePulse})`);
+          rayGrad.addColorStop(0, `rgba(${colors.accent},${0.025 * corePulse})`);
           rayGrad.addColorStop(1, 'rgba(0,0,0,0)');
           ctx.strokeStyle = rayGrad;
-          ctx.lineWidth = 1.5 + Math.sin(timeRef.current * 0.12 + ray * 0.7) * 1;
+          ctx.lineWidth = 1 + Math.sin(timeRef.current * 0.12 + ray * 0.7) * 0.5;
           ctx.beginPath();
           ctx.moveTo(c.x, c.y);
           ctx.lineTo(rx, ry);
@@ -653,7 +653,7 @@ export function ParticleSystem({ activeGesture }: ParticleSystemProps) {
       animationRef.current = requestAnimationFrame(animate);
     };
 
-    animate();
+    animationRef.current = requestAnimationFrame(animate);
 
     return () => {
       window.removeEventListener('resize', resizeCanvas);
@@ -665,7 +665,7 @@ export function ParticleSystem({ activeGesture }: ParticleSystemProps) {
     <canvas
       ref={canvasRef}
       className="fixed inset-0 pointer-events-none z-0"
-      style={{ background: 'rgba(5,10,20,1)' }}
+      style={{ background: '#0a192f' }}
     />
   );
 }

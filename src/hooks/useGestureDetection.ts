@@ -131,7 +131,8 @@ export function useGestureDetection({ onGestureDetected, demoMode = false }: Use
       const result: GestureResult = {
         gesture,
         confidence,
-        landmarks
+        landmarks,
+        timestamp: Date.now()
       };
 
       if (gesture !== lastResultRef.current?.gesture) {
@@ -158,7 +159,8 @@ export function useGestureDetection({ onGestureDetected, demoMode = false }: Use
       const result: GestureResult = {
         gesture,
         confidence: 0.9,
-        landmarks
+        landmarks,
+        timestamp: Date.now()
       };
 
       setCurrentGesture(result);

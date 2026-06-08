@@ -13,6 +13,7 @@ export interface GestureResult {
   gesture: GestureType;
   confidence: number;
   landmarks: number[][];
+  timestamp?: number;
 }
 
 export interface SystemStatus {

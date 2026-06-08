@@ -1,5 +1,8 @@
 // Sound effects using Web Audio API
-const audioContext = typeof window !== 'undefined' ? new (window.AudioContext || (window as any).webkitAudioContext)() : null;
+const audioContext = typeof window !== 'undefined' ? (() => {
+  const Ctor = window.AudioContext || (window as typeof globalThis & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  return Ctor ? new Ctor() : null;
+})() : null;
 
 export function playSound(type: 'beep' | 'confirm' | 'cancel' | 'activate' | 'switch') {
   if (!audioContext) return;
