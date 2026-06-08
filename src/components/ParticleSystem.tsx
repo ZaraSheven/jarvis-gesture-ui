@@ -560,6 +560,70 @@ export function ParticleSystem({ activeGesture }: ParticleSystemProps) {
         }
       });
 
+      // Particle-to-particle connections with spatial grid
+      if (isWeapon) {
+        const cellSize = 120;
+        const grid = new Map<string, number[]>();
+
+        particlesRef.current.forEach((p, i) => {
+          const proj = projectZ(p.z);
+          const sx = c.x + (p.x - c.x) * proj;
+          const sy = c.y + (p.y - c.y) * proj;
+          const cx = Math.floor(sx / cellSize);
+          const cy = Math.floor(sy / cellSize);
+          const key = `${cx},${cy}`;
+          if (!grid.has(key)) grid.set(key, []);
+          grid.get(key)!.push(i);
+        });
+
+        const checked = new Set<string>();
+        const maxDist = 100;
+        const maxDistSq = maxDist * maxDist;
+
+        for (const [key, indices] of grid) {
+          const [gx, gy] = key.split(',').map(Number);
+          for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+              const neighborKey = `${gx + dx},${gy + dy}`;
+              const neighbors = grid.get(neighborKey);
+              if (!neighbors) continue;
+
+              for (const i of indices) {
+                for (const j of neighbors) {
+                  if (i >= j) continue;
+                  const pairKey = i < j ? `${i}-${j}` : `${j}-${i}`;
+                  if (checked.has(pairKey)) continue;
+                  checked.add(pairKey);
+
+                  const pi = particlesRef.current[i];
+                  const pj = particlesRef.current[j];
+                  const projI = projectZ(pi.z);
+                  const projJ = projectZ(pj.z);
+                  const sxi = c.x + (pi.x - c.x) * projI;
+                  const syi = c.y + (pi.y - c.y) * projI;
+                  const sxj = c.x + (pj.x - c.x) * projJ;
+                  const syj = c.y + (pj.y - c.y) * projJ;
+
+                  const distSq = (sxi - sxj) ** 2 + (syi - syj) ** 2;
+                  if (distSq < maxDistSq) {
+                    const dist = Math.sqrt(distSq);
+                    const lineAlpha = (1 - dist / maxDist) * 0.15 * Math.min(projI, projJ);
+                    if (lineAlpha > 0.01) {
+                      ctx.beginPath();
+                      ctx.moveTo(sxi, syi);
+                      ctx.lineTo(sxj, syj);
+                      ctx.strokeStyle = `rgba(${colors.core},${lineAlpha})`;
+                      ctx.lineWidth = 0.8;
+                      ctx.stroke();
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
       if (isWeapon && struct) {
         struct.gemPositions.forEach(gem => {
           const gemPulse = Math.sin(timeRef.current * 0.06) * 0.3 + 0.7;
