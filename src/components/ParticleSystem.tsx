@@ -577,8 +577,10 @@ export function ParticleSystem({ activeGesture }: ParticleSystemProps) {
         });
 
         const checked = new Set<string>();
-        const maxDist = 100;
+        const maxDist = 80;
         const maxDistSq = maxDist * maxDist;
+        const maxConnections = 3;
+        const connectionCount = new Map<number, number>();
 
         for (const [key, indices] of grid) {
           const [gx, gy] = key.split(',').map(Number);
@@ -589,9 +591,11 @@ export function ParticleSystem({ activeGesture }: ParticleSystemProps) {
               if (!neighbors) continue;
 
               for (const i of indices) {
+                if ((connectionCount.get(i) || 0) >= maxConnections) continue;
                 for (const j of neighbors) {
                   if (i >= j) continue;
-                  const pairKey = i < j ? `${i}-${j}` : `${j}-${i}`;
+                  if ((connectionCount.get(j) || 0) >= maxConnections) continue;
+                  const pairKey = `${i}-${j}`;
                   if (checked.has(pairKey)) continue;
                   checked.add(pairKey);
 
@@ -607,15 +611,17 @@ export function ParticleSystem({ activeGesture }: ParticleSystemProps) {
                   const distSq = (sxi - sxj) ** 2 + (syi - syj) ** 2;
                   if (distSq < maxDistSq) {
                     const dist = Math.sqrt(distSq);
-                    const lineAlpha = (1 - dist / maxDist) * 0.15 * Math.min(projI, projJ);
+                    const lineAlpha = (1 - dist / maxDist) * 0.3 * Math.min(projI, projJ);
                     if (lineAlpha > 0.01) {
                       ctx.beginPath();
                       ctx.moveTo(sxi, syi);
                       ctx.lineTo(sxj, syj);
                       ctx.strokeStyle = `rgba(${colors.core},${lineAlpha})`;
-                      ctx.lineWidth = 0.8;
+                      ctx.lineWidth = 0.5;
                       ctx.stroke();
                     }
+                    connectionCount.set(i, (connectionCount.get(i) || 0) + 1);
+                    connectionCount.set(j, (connectionCount.get(j) || 0) + 1);
                   }
                 }
               }
